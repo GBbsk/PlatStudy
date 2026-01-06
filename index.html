@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curso JS CS50</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#1e293b',
+                            950: '#020617',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .chart-container { position: relative; width: 100%; height: 300px; }
+        .module-card { transition: all 0.3s ease; }
+        /* Link styles */
+        .lesson-link { text-decoration: none; display: block; }
+        .lesson-link:hover .lesson-title { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+        .lesson-link:hover .lesson-dot { transform: scale(1.5); }
+        .lesson-dot { transition: transform 0.2s ease; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300">
+
+    <header class="bg-slate-900 text-white shadow-xl border-b-4 border-yellow-500 relative">
+        <button id="theme-toggle" class="absolute top-4 right-4 p-2 rounded-full bg-slate-800 hover:bg-slate-700 text-yellow-400 transition-colors focus:outline-none border border-slate-700 z-10">
+            <svg id="theme-toggle-light-icon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+            <svg id="theme-toggle-dark-icon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+        </button>
+
+        <div class="container mx-auto px-6 py-12">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <div class="md:w-3/4">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-yellow-500 text-slate-900 px-2 py-0.5 rounded font-bold text-xs uppercase tracking-wider">CS50</span>
+                        <span class="text-slate-400 text-sm font-mono">v2026.1.0</span>
+                    </div>
+                    <h1 class="text-4xl md:text-5xl font-black mb-4 tracking-tight">JavaScript: <span class="text-yellow-400">Deep Dive</span></h1>
+                    <p class="text-xl text-slate-300 font-light mb-6 max-w-2xl">Um currículo rigoroso. Concept-then-Code.</p>
+                </div>
+                <div class="md:w-1/4 mt-8 md:mt-0 flex justify-end">
+                    <div class="text-8xl font-black text-slate-800 dark:text-slate-950 select-none tracking-tighter opacity-50 md:opacity-100">JS</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 md:px-6 py-12 space-y-16">
+
+        <section>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 transition-colors">
+                    <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-1">Radar de Competências</h3>
+                    <div class="chart-container"><canvas id="radarChart"></canvas></div>
+                </div>
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 transition-colors">
+                    <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-1">Curva de Dificuldade</h3>
+                    <div class="chart-container"><canvas id="lineChart"></canvas></div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="flex items-center gap-4 mb-10">
+                <h2 class="text-3xl font-bold text-slate-900 dark:text-white">Grade Curricular</h2>
+                <div class="h-1 flex-grow bg-slate-200 dark:bg-slate-700 rounded"></div>
+            </div>
+
+            <div class="space-y-8">
+
+                <div class="module-card bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden border-l-8 border-indigo-500 transition-colors">
+                    <div class="flex flex-col md:flex-row">
+                        <div class="bg-indigo-50 dark:bg-slate-900/50 p-6 md:w-64 flex-shrink-0 flex flex-col justify-center border-r border-indigo-100 dark:border-slate-700">
+                            <span class="text-xs font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest mb-1">Módulo 01</span>
+                            <h3 class="text-2xl font-bold text-indigo-900 dark:text-indigo-200 leading-tight">Fundamentos</h3>
+                        </div>
+                        <div class="p-6 flex-grow grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <a href="aula.html?id=1.1" class="lesson-link group text-indigo-600 dark:text-indigo-400">
+                                    <h4 class="lesson-title font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                        <span class="lesson-dot w-2 h-2 bg-indigo-500 rounded-full"></span> 1.1 Variáveis e Tipos
+                                    </h4>
+                                </a>
+                                <ul class="text-sm text-slate-600 dark:text-slate-400 list-disc list-inside mb-4 space-y-1">
+                                    <li><code>let</code>, <code>const</code> vs <code>var</code>.</li>
+                                    <li>Tipos primitivos</li>
+                                    <li>Type coercion e comparações</li>
+                                    <li>Template literals</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <a href="aula.html?id=1.2" class="lesson-link group text-indigo-600 dark:text-indigo-400">
+                                    <h4 class="lesson-title font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                        <span class="lesson-dot w-2 h-2 bg-indigo-500 rounded-full"></span> 1.2 Controle de Fluxo
+                                    </h4>
+                                </a>
+                                <ul class="text-sm text-slate-600 dark:text-slate-400 list-disc list-inside mb-4 space-y-1">
+                                    <li><code>switch</code>, loops e ternários</li>
+                                    <li>for, while, do-while</li>
+                                    <li><code>break e continue</code></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="module-card bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden border-l-8 border-sky-500 transition-colors">
+                    <div class="flex flex-col md:flex-row">
+                        <div class="bg-sky-50 dark:bg-slate-900/50 p-6 md:w-64 flex-shrink-0 flex flex-col justify-center border-r border-sky-100 dark:border-slate-700">
+                            <span class="text-xs font-bold text-sky-500 dark:text-sky-400 uppercase tracking-widest mb-1">Módulo 02</span>
+                            <h3 class="text-2xl font-bold text-sky-900 dark:text-sky-200 leading-tight">Funções</h3>
+                        </div>
+                        <div class="p-6 flex-grow grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <a href="aula.html?id=2.1" class="lesson-link group text-sky-600 dark:text-sky-400">
+                                    <h4 class="lesson-title font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-2 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                                        <span class="lesson-dot w-2 h-2 bg-sky-500 rounded-full"></span> 2.1 Anatomy of Functions
+                                    </h4>
+                                </a>
+                                <ul class="text-sm text-slate-600 dark:text-slate-400 list-disc list-inside mb-4 space-y-1">
+                                    <li>Function declarations vs expressions</li>
+                                    <li>Arrow functions</li>
+                                    <li>Rest parameters</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <a href="aula.html?id=2.2" class="lesson-link group text-sky-600 dark:text-sky-400">
+                                    <h4 class="lesson-title font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-2 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                                        <span class="lesson-dot w-2 h-2 bg-sky-500 rounded-full"></span> 2.2 Closures & Hoisting
+                                    </h4>
+                                </a>
+                                <ul class="text-sm text-slate-600 dark:text-slate-400 list-disc list-inside mb-4 space-y-1">
+                                    <li>Escopo (Global, Função, Bloco)</li>
+                                    <li>Hoisting e Closures</li>
+                                    <li>IIFE</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="module-card bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden border-l-8 border-emerald-500 transition-colors">
+                    <div class="flex flex-col md:flex-row">
+                        <div class="bg-emerald-50 dark:bg-slate-900/50 p-6 md:w-64 flex-shrink-0 flex flex-col justify-center border-r border-emerald-100 dark:border-slate-700">
+                            <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Módulo 03</span>
+                            <h3 class="text-2xl font-bold text-emerald-900 dark:text-emerald-200 leading-tight">Arrays</h3>
+                        </div>
+                        <div class="p-6 flex-grow grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <a href="aula.html?id=3.1" class="lesson-link group text-emerald-600 dark:text-emerald-400">
+                                    <h4 class="lesson-title font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                                        <span class="lesson-dot w-2 h-2 bg-emerald-500 rounded-full"></span> 3.1 Manipulação Básica
+                                    </h4>
+                                </a>
+                                <ul class="text-sm text-slate-600 dark:text-slate-400 list-disc list-inside mb-4 space-y-1">
+                                    <li>push, pop, shift, unshift</li>
+                                    <li>splice, slice</li>
+                                    <li>Spread operator e Destructuring</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <a href="aula.html?id=3.2" class="lesson-link group text-emerald-600 dark:text-emerald-400">
+                                    <h4 class="lesson-title font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                                        <span class="lesson-dot w-2 h-2 bg-emerald-500 rounded-full"></span> 3.2 Functional Methods
+                                    </h4>
+                                </a>
+                                <ul class="text-sm text-slate-600 dark:text-slate-400 list-disc list-inside mb-4 space-y-1">
+                                    <li>map, filter, reduce</li>
+                                    <li>forEach, find, findIndex</li>
+                                    <li>Method chaining</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="module-card bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden border-l-8 border-orange-500 transition-colors">
+                    <div class="flex flex-col md:flex-row">
+                        <div class="bg-orange-50 dark:bg-slate-900/50 p-6 md:w-64 flex-shrink-0 flex flex-col justify-center border-r border-orange-100 dark:border-slate-700">
+                            <span class="text-xs font-bold text-orange-500 dark:text-orange-400 uppercase tracking-widest mb-1">Módulo 04</span>
+                            <h3 class="text-2xl font-bold text-orange-900 dark:text-orange-200 leading-tight">Objetos e OOP</h3>
+                        </div>
+                        <div class="p-6 flex-grow grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <a href="aula.html?id=4.1" class="lesson-link group text-orange-600 dark:text-orange-400">
+                                    <h4 class="lesson-title font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-2 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                                        <span class="lesson-dot w-2 h-2 bg-orange-500 rounded-full"></span> 4.1 Objetos Fundamentais
+                                    </h4>
+                                </a>
+                                <ul class="text-sm text-slate-600 dark:text-slate-400 list-disc list-inside mb-4 space-y-1">
+                                    <li>Literal, constructor, Object.create</li>
+                                    <li>This keyword</li>
+                                    <li>Object destructuring</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <a href="aula.html?id=4.2" class="lesson-link group text-orange-600 dark:text-orange-400">
+                                    <h4 class="lesson-title font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-2 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                                        <span class="lesson-dot w-2 h-2 bg-orange-500 rounded-full"></span> 4.2 POO
+                                    </h4>
+                                </a>
+                                <ul class="text-sm text-slate-600 dark:text-slate-400 list-disc list-inside mb-4 space-y-1">
+                                    <li>Classes ES6 e Herança</li>
+                                    <li>Métodos estáticos</li>
+                                    <li>Encapsulamento</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="module-card bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden border-l-8 border-fuchsia-500 transition-colors">
+                    <div class="flex flex-col md:flex-row">
+                        <div class="bg-fuchsia-50 dark:bg-slate-900/50 p-6 md:w-64 flex-shrink-0 flex flex-col justify-center border-r border-fuchsia-100 dark:border-slate-700">
+                            <span class="text-xs font-bold text-fuchsia-500 dark:text-fuchsia-400 uppercase tracking-widest mb-1">Módulo 05</span>
+                            <h3 class="text-2xl font-bold text-fuchsia-900 dark:text-fuchsia-200 leading-tight">DOM e Eventos</h3>
+                        </div>
+                        <div class="p-6 flex-grow grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <a href="aula.html?id=5.1" class="lesson-link group text-fuchsia-600 dark:text-fuchsia-400">
+                                    <h4 class="lesson-title font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-2 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400 transition-colors">
+                                        <span class="lesson-dot w-2 h-2 bg-fuchsia-500 rounded-full"></span> 5.1 Manipulação do DOM
+                                    </h4>
+                                </a>
+                                <ul class="text-sm text-slate-600 dark:text-slate-400 list-disc list-inside mb-4 space-y-1">
+                                    <li>Seleção e Criação de elementos</li>
+                                    <li>Atributos, classes e estilos</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <a href="aula.html?id=5.2" class="lesson-link group text-fuchsia-600 dark:text-fuchsia-400">
+                                    <h4 class="lesson-title font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-2 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400 transition-colors">
+                                        <span class="lesson-dot w-2 h-2 bg-fuchsia-500 rounded-full"></span> 5.2 Eventos
+                                    </h4>
+                                </a>
+                                <ul class="text-sm text-slate-600 dark:text-slate-400 list-disc list-inside mb-4 space-y-1">
+                                    <li>Event listeners e Objeto Event</li>
+                                    <li>Bubbling e Capturing</li>
+                                    <li>Event delegation</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="module-card bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden border-l-8 border-gray-500 transition-colors">
+                    <div class="flex flex-col md:flex-row">
+                        <div class="bg-gray-50 dark:bg-slate-900/50 p-6 md:w-64 flex-shrink-0 flex flex-col justify-center border-r border-gray-100 dark:border-slate-700">
+                            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1">Módulo 06</span>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-200 leading-tight">Assincronicidade</h3>
+                        </div>
+                        <div class="p-6 flex-grow grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <a href="aula.html?id=6.1" class="lesson-link group text-gray-600 dark:text-gray-400">
+                                    <h4 class="lesson-title font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-2 group-hover:text-gray-600 dark:group-hover:text-gray-400 transition-colors">
+                                        <span class="lesson-dot w-2 h-2 bg-gray-500 rounded-full"></span> 6.1 Programação Assíncrona
+                                    </h4>
+                                </a>
+                                <ul class="text-sm text-slate-600 dark:text-slate-400 list-disc list-inside mb-4 space-y-1">
+                                    <li>Call stack, Event loop, Callbacks</li>
+                                    <li>Promises (.then, .catch)</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <a href="aula.html?id=6.2" class="lesson-link group text-gray-600 dark:text-gray-400">
+                                    <h4 class="lesson-title font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-2 group-hover:text-gray-600 dark:group-hover:text-gray-400 transition-colors">
+                                        <span class="lesson-dot w-2 h-2 bg-gray-500 rounded-full"></span> 6.2 Async/Await e APIs
+                                    </h4>
+                                </a>
+                                <ul class="text-sm text-slate-600 dark:text-slate-400 list-disc list-inside mb-4 space-y-1">
+                                    <li>Fetch API e JSON</li>
+                                    <li>Error handling com try/catch</li>
+                                    <li>Promise.all</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                 <div class="module-card bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden border-l-8 border-gray-500 transition-colors">
+                    <div class="flex flex-col md:flex-row">
+                        <div class="bg-gray-50 dark:bg-slate-900/50 p-6 md:w-64 flex-shrink-0 flex flex-col justify-center border-r border-gray-100 dark:border-slate-700">
+                            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1">Módulo 07</span>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-200 leading-tight">Módulos e Ferramentas</h3>
+                        </div>
+                        <div class="p-6 flex-grow grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <a href="aula.html?id=7.1" class="lesson-link group text-gray-600 dark:text-gray-400">
+                                    <h4 class="lesson-title font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-2 group-hover:text-gray-600 dark:group-hover:text-gray-400 transition-colors">
+                                        <span class="lesson-dot w-2 h-2 bg-gray-500 rounded-full"></span> 7.1 ES6 Modules
+                                    </h4>
+                                </a>
+                                <ul class="text-sm text-slate-600 dark:text-slate-400 list-disc list-inside mb-4 space-y-1">
+                                    <li>import e export</li>
+                                    <li>Module scope</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <a href="aula.html?id=7.2" class="lesson-link group text-gray-600 dark:text-gray-400">
+                                    <h4 class="lesson-title font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-2 group-hover:text-gray-600 dark:group-hover:text-gray-400 transition-colors">
+                                        <span class="lesson-dot w-2 h-2 bg-gray-500 rounded-full"></span> 7.2 Ferramentas
+                                    </h4>
+                                </a>
+                                <ul class="text-sm text-slate-600 dark:text-slate-400 list-disc list-inside mb-4 space-y-1">
+                                    <li>NPM e package.json</li>
+                                    <li>Bundlers e Transpilers</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="module-card bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden border-l-8 border-gray-500 transition-colors">
+                    <div class="flex flex-col md:flex-row">
+                        <div class="bg-gray-50 dark:bg-slate-900/50 p-6 md:w-64 flex-shrink-0 flex flex-col justify-center border-r border-gray-100 dark:border-slate-700">
+                            <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1">Módulo 08</span>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-200 leading-tight">Avançado</h3>
+                        </div>
+                        <div class="p-6 flex-grow grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <a href="aula.html?id=8.1" class="lesson-link group text-gray-600 dark:text-gray-400">
+                                    <h4 class="lesson-title font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-2 group-hover:text-gray-600 dark:group-hover:text-gray-400 transition-colors">
+                                        <span class="lesson-dot w-2 h-2 bg-gray-500 rounded-full"></span> 8.1 Funcional
+                                    </h4>
+                                </a>
+                                <ul class="text-sm text-slate-600 dark:text-slate-400 list-disc list-inside mb-4 space-y-1">
+                                    <li>Higher-order functions, Currying</li>
+                                    <li>Recursão, Generators</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <a href="aula.html?id=8.2" class="lesson-link group text-gray-600 dark:text-gray-400">
+                                    <h4 class="lesson-title font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-2 group-hover:text-gray-600 dark:group-hover:text-gray-400 transition-colors">
+                                        <span class="lesson-dot w-2 h-2 bg-gray-500 rounded-full"></span> 8.2 Patterns & Perf
+                                    </h4>
+                                </a>
+                                <ul class="text-sm text-slate-600 dark:text-slate-400 list-disc list-inside mb-4 space-y-1">
+                                    <li>Patterns (Module, Observer)</li>
+                                    <li>Debouncing, Throttling, Storage</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-slate-900 text-slate-500 py-10 mt-12 text-center border-t border-slate-800">
+        <p>&copy; 2026 Curso de JavaScript Estilo CS50.</p>
+    </footer>
+
+    <script>
+        // --- LÓGICA DO MODO NOTURNO ---
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+        const html = document.documentElement;
+
+        // Função para atualizar os ícones
+        function updateIcons(isDark) {
+            if (isDark) {
+                themeToggleDarkIcon.classList.add('hidden');
+                themeToggleLightIcon.classList.remove('hidden');
+            } else {
+                themeToggleLightIcon.classList.add('hidden');
+                themeToggleDarkIcon.classList.remove('hidden');
+            }
+        }
+
+        // Função para atualizar cores dos gráficos
+        function updateChartsTheme(isDark) {
+            const textColor = isDark ? '#e2e8f0' : '#475569'; // slate-200 vs slate-600
+            const gridColor = isDark ? '#334155' : '#e2e8f0'; // slate-700 vs slate-200
+
+            // Atualiza Radar
+            if(window.radarChartInstance) {
+                window.radarChartInstance.options.scales.r.pointLabels.color = textColor;
+                window.radarChartInstance.options.scales.r.grid.color = gridColor;
+                window.radarChartInstance.options.scales.r.angleLines.color = gridColor;
+                window.radarChartInstance.update();
+            }
+
+            // Atualiza Line
+            if(window.lineChartInstance) {
+                window.lineChartInstance.options.scales.x.ticks.color = textColor;
+                window.lineChartInstance.options.scales.y.ticks.color = textColor;
+                window.lineChartInstance.options.scales.y.grid.color = gridColor;
+                window.lineChartInstance.update();
+            }
+        }
+
+        // Checar preferência inicial
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+            updateIcons(true);
+        } else {
+            html.classList.remove('dark');
+            updateIcons(false);
+        }
+
+        // Event Listener do Botão
+        themeToggleBtn.addEventListener('click', function() {
+            html.classList.toggle('dark');
+            const isDark = html.classList.contains('dark');
+            
+            if (isDark) {
+                localStorage.setItem('color-theme', 'dark');
+            } else {
+                localStorage.setItem('color-theme', 'light');
+            }
+            
+            updateIcons(isDark);
+            updateChartsTheme(isDark);
+        });
+
+        // --- INICIALIZAÇÃO DOS GRÁFICOS ---
+        
+        // Define cores iniciais baseadas no estado atual
+        const initialIsDark = html.classList.contains('dark');
+        const initialTextColor = initialIsDark ? '#e2e8f0' : '#475569';
+        const initialGridColor = initialIsDark ? '#334155' : '#e2e8f0';
+
+        const ctxRadar = document.getElementById('radarChart').getContext('2d');
+        window.radarChartInstance = new Chart(ctxRadar, {
+            type: 'radar',
+            data: {
+                labels: ['Lógica', 'Escopo', 'Arrays', 'OOP', 'DOM', 'Async', 'Tools', 'Patterns'],
+                datasets: [{ label: 'Nível Alvo', data: [95, 90, 95, 85, 90, 85, 75, 70], backgroundColor: 'rgba(99, 102, 241, 0.2)', borderColor: 'rgba(99, 102, 241, 1)', pointBackgroundColor: 'rgba(99, 102, 241, 1)' }]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                scales: { 
+                    r: { 
+                        ticks: { display: false, backdropColor: 'transparent' },
+                        grid: { color: initialGridColor },
+                        angleLines: { color: initialGridColor },
+                        pointLabels: { color: initialTextColor, font: { size: 12 } }
+                    } 
+                }, 
+                plugins: { legend: { display: false } } 
+            }
+        });
+
+        const ctxLine = document.getElementById('lineChart').getContext('2d');
+        window.lineChartInstance = new Chart(ctxLine, {
+            type: 'line',
+            data: {
+                labels: ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'Proj'],
+                datasets: [{ label: 'Dificuldade', data: [20, 60, 50, 55, 40, 85, 30, 80, 75], borderColor: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.1)', fill: true, tension: 0.4 }]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                scales: { 
+                    y: { 
+                        display: true, // Mostra grid Y
+                        grid: { color: initialGridColor },
+                        ticks: { color: initialTextColor }
+                    }, 
+                    x: { 
+                        grid: { display: false },
+                        ticks: { color: initialTextColor }
+                    } 
+                }, 
+                plugins: { legend: { display: false } } 
+            }
+        });
+
+    </script>
+</body>
+</html>
