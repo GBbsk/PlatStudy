@@ -4131,16 +4131,16 @@ const usuario2 = {
                     <ul class="list-disc pl-5 text-sm text-green-900">
                         <li>Precisa criar múltiplos objetos com estrutura similar</li>
                         <li>Quer organizar código relacionado em um único lugar</li>
-                        <li>Precisa de herança (compartilhar comportamento)</li>
-                        <li>Está modelando entidades do mundo real (Usuário, Produto)</li>
+                        <li>Precisa de herança (compartilhar comportamento entre tipos relacionados)</li>
+                        <li>Está modelando entidades do mundo real (Usuário, Produto, Pedido, etc)</li>
                     </ul>
                 </div>
                 <div class="bg-red-50 p-4 rounded border border-red-200">
                     <h4 class="font-bold text-red-800 mb-2">Não use quando:</h4>
                     <ul class="list-disc pl-5 text-sm text-red-900">
                         <li>Precisa apenas de um único objeto (use object literal)</li>
-                        <li>A funcionalidade é simples e não relacionada (funções puras)</li>
-                        <li>Está fazendo manipulação de dados simples</li>
+                        <li>A funcionalidade é simples e não relacionada (use funções puras)</li>
+                        <li>Está fazendo manipulação de dados simples (use métodos de array)</li>
                     </ul>
                 </div>
             </div>
@@ -4261,8 +4261,15 @@ const conta2 = new ContaBancaria("Maria", 500);
 conta1.depositar(500); // Afeta apenas conta1
 conta2.sacar(100);     // Afeta apenas conta2</code></pre>
 
-            <h3 class="text-amber-700 font-bold mt-6">Métodos Estáticos - Operam na Classe</h3>
+            <h3 class="text-amber-700 font-bold mt-6">Métodos Estáticos - Operam na Classe, Não em Instâncias</h3>
             <p>Métodos estáticos pertencem à classe em si, não aos objetos. Use-os para funcionalidades que não dependem de dados de um objeto específico.</p>
+            <p>Quando usar métodos estáticos:</p>
+            <ul class="list-disc pl-5 text-sm mb-4">
+                <li>Funções utilitárias relacionadas à classe</li>
+                <li>Validações que não dependem de instância</li>
+                <li>Factory methods (métodos que criam instâncias)</li>
+                <li>Constantes ou configurações da classe</li>
+            </ul>
             
             
 
@@ -4297,11 +4304,19 @@ console.log(Usuario.validarEmail("invalido"));        // false
 
 const admin = Usuario.criarAdmin("Carlos", "carlos@admin.com", "123");
 const convidado = Usuario.criarConvidado("Visitante");</code></pre>
+            <p class="mt-2 text-sm text-slate-600">Por que isso é útil? Você não precisa criar um objeto só para validar um email ou criar usuários especiais. Os métodos estáticos funcionam como "funções da classe" que organizam código relacionado.</p>
 
             <hr class="my-10 border-slate-200">
 
             <h2>4. Getters e Setters em Classes</h2>
-            <p>Getters e setters permitem que você controle como propriedades são acessadas e modificadas.</p>
+            <h3 class="text-amber-700 font-bold mt-6">Por que Getters e Setters?</h3>
+            <p>Getters e setters permitem que você controle como propriedades são acessadas e modificadas. Isso é fundamental para:</p>
+            <ul class="list-disc pl-5 text-sm mb-4">
+                <li>Validação: Garantir que dados inválidos não sejam aceitos</li>
+                <li>Computação: Calcular valores dinamicamente</li>
+                <li>Encapsulamento: Esconder detalhes de implementação</li>
+                <li>Logs/Debug: Rastrear quando propriedades são acessadas</li>
+            </ul>
 
             <pre><code class="language-javascript">class Produto {
   constructor(nome, preco) {
@@ -4346,14 +4361,48 @@ console.log(produto.preco); // 60
 
 console.log(produto.precoComImposto); // 69 (calculado dinamicamente)</code></pre>
 
+            <div class="bg-amber-50 p-4 rounded border border-amber-200 mt-4 text-sm">
+                <strong>Quando usar getters/setters:</strong>
+                <ul class="list-disc pl-5 mt-2 text-amber-900">
+                    <li>✅ Sempre que precisar validar dados</li>
+                    <li>✅ Para propriedades computadas/calculadas</li>
+                    <li>✅ Quando quiser controlar acesso a propriedades</li>
+                    <li>❌ Para propriedades simples sem lógica (use propriedades normais)</li>
+                </ul>
+            </div>
+
             <hr class="my-10 border-slate-200">
 
             <h2>5. Herança - Compartilhando Comportamento</h2>
             
             <h3 class="text-amber-700 font-bold mt-6">O Problema que Herança Resolve</h3>
-            <p>Imagine um sistema com diferentes tipos de usuários: clientes, vendedores e administradores. Todos têm nome, email e fazem login - mas cada um tem comportamentos específicos.</p>
+            <p>Imagine um sistema com diferentes tipos de usuários: clientes, vendedores e administradores. Todos têm nome, email e fazem login - mas cada um tem comportamentos específicos:</p>
+            
+            <pre><code class="language-javascript">// ❌ Sem herança - código duplicado
+class Cliente {
+  constructor(nome, email) {
+    this.nome = nome;
+    this.email = email;
+  }
+  login() { /*...*/ }
+  comprar() { /*...*/ }
+}
+
+class Vendedor {
+  constructor(nome, email) {
+    this.nome = nome;      // Duplicado!
+    this.email = email;    // Duplicado!
+  }
+  login() { /*...*/ }      // Duplicado!
+  vender() { /*...*/ }
+}</code></pre>
+
+            <p class="mt-4">Herança permite criar uma classe base com o comportamento compartilhado, e classes filhas que herdam e estendem esse comportamento:</p>
             
             
+
+[Image of inheritance diagram]
+
 
             <pre><code class="language-javascript">// ✅ Com herança - organizado e sem duplicação
 class Usuario {
@@ -4451,10 +4500,31 @@ carro.acelerar();
 // "Acelerando..."
 // "Carro acelerando rapidamente!"</code></pre>
 
+            <div class="bg-gray-100 p-4 rounded border border-gray-300 mt-4 text-sm">
+                <strong>Quando usar herança:</strong>
+                <ul class="list-disc pl-5 mt-2">
+                    <li>✅ Relação "é um" (Cachorro É UM Animal, Cliente É UM Usuário)</li>
+                    <li>✅ Compartilhar comportamento entre classes relacionadas</li>
+                    <li>✅ Especializar comportamento geral</li>
+                    <li>❌ NÃO use apenas para reaproveitar código (use composição)</li>
+                    <li>❌ NÃO crie hierarquias muito profundas (max 2-3 níveis)</li>
+                </ul>
+            </div>
+
             <hr class="my-10 border-slate-200">
 
             <h2>6. Encapsulamento com Campos Privados</h2>
-            <p>Encapsulamento significa esconder detalhes internos de implementação. JavaScript moderno (ES2022) introduziu campos verdadeiramente privados usando <code>#</code>:</p>
+            <h3 class="text-amber-700 font-bold mt-6">Por que Privacidade Importa?</h3>
+            <p>Encapsulamento significa esconder detalhes internos de implementação. Isso:</p>
+            <ul class="list-disc pl-5 text-sm mb-4">
+                <li>Previne modificações acidentais</li>
+                <li>Permite mudar implementação interna sem quebrar código externo</li>
+                <li>Força uso de métodos públicos controlados</li>
+                <li>Torna o código mais seguro e previsível</li>
+            </ul>
+
+            <h3 class="text-amber-700 font-bold mt-6">Campos Privados (# syntax)</h3>
+            <p>JavaScript moderno (ES2022) introduziu campos verdadeiramente privados usando <code>#</code>:</p>
 
             <pre><code class="language-javascript">class ContaBancaria {
   // Campos privados - começam com #
@@ -4502,11 +4572,46 @@ console.log(conta.titular);  // "João" (público, acessa normalmente)
 console.log(conta.consultarSaldo("1234")); // "Saldo: R$ 1000"
 conta.sacar(100, "1234");</code></pre>
 
+            <h3 class="text-amber-700 font-bold mt-6">Por que isso é importante?</h3>
+            <p><strong>Sem encapsulamento:</strong></p>
+            <pre><code class="language-javascript">// ❌ Sem privacidade
+class ContaRuim {
+  constructor(saldo) {
+    this.saldo = saldo;
+  }
+}
+
+const conta = new ContaRuim(1000);
+conta.saldo = -5000; // ⚠️ Nada impede isso!
+conta.saldo = "texto"; // ⚠️ Ou isso!</code></pre>
+
+            <p><strong>Com encapsulamento:</strong></p>
+            <pre><code class="language-javascript">// ✅ Com privacidade
+class ContaBoa {
+  #saldo;
+  
+  constructor(saldo) {
+    this.#saldo = saldo;
+  }
+  
+  depositar(valor) {
+    if (valor <= 0) {
+      throw new Error("Valor inválido");
+    }
+    this.#saldo += valor;
+  }
+}
+
+const conta = new ContaBoa(1000);
+// conta.#saldo = -5000; // Erro! Não pode acessar
+conta.depositar(-100);    // Erro! Validação impede</code></pre>
+
             <hr class="my-10 border-slate-200">
 
             <h2>7. Métodos e Propriedades Estáticas</h2>
             
             <h3 class="text-amber-700 font-bold mt-6">Propriedades Estáticas - Dados Compartilhados</h3>
+            <p>Propriedades estáticas pertencem à classe, não às instâncias. São úteis para constantes relacionadas à classe, configurações globais e contadores de instâncias.</p>
             <pre><code class="language-javascript">class Configuracao {
   // Propriedades estáticas - compartilhadas por todas as instâncias
   static API_URL = "https://api.exemplo.com";
@@ -4724,8 +4829,8 @@ class Arqueiro extends Personagem {
   }
 }
 
-// Exemplo de uso
-console.log("=== BATALHA RPG ===");
+// Exemplo de uso do sistema
+console.log("=== BATALHA RPG ===\\n");
 
 const guerreiro = new Guerreiro("Thorin");
 const mago = new Mago("Gandalf");
@@ -4733,14 +4838,23 @@ const arqueiro = new Arqueiro("Legolas");
 
 console.log(\`\${guerreiro.nome} - Vida: \${guerreiro.vida}/\${guerreiro.vidaMaxima}\`);
 console.log(\`\${mago.nome} - Vida: \${mago.vida}/\${mago.vidaMaxima} - Mana: \${mago.mana}\`);
-console.log(\`\${arqueiro.nome} - Vida: \${arqueiro.vida}/\${arqueiro.vidaMaxima}\`);
+console.log(\`\${arqueiro.nome} - Vida: \${arqueiro.vida}/\${arqueiro.vidaMaxima}\\n\`);
 
-// Ações
-console.log(guerreiro.atacar().mensagem);
-console.log(mago.atacar().mensagem);
-console.log(arqueiro.atacar().mensagem);
+// Guerreiro ataca
+const ataqueGuerreiro = guerreiro.atacar();
+console.log(ataqueGuerreiro.mensagem);
 
-console.log("=== HABILIDADES ESPECIAIS ===");
+// Mago lança feitiço
+const ataqueMago = mago.atacar();
+console.log(ataqueMago.mensagem);
+
+// Arqueiro atira
+const ataqueArqueiro = arqueiro.atacar();
+console.log(ataqueArqueiro.mensagem);
+
+console.log("\\n=== HABILIDADES ESPECIAIS ===\\n");
+
+// Habilidades especiais
 console.log(guerreiro.golpeFurioso().mensagem);
 console.log(mago.explosaoArcana().mensagem);
 console.log(mago.meditar());</code></pre>
@@ -4761,125 +4875,124 @@ console.log(mago.meditar());</code></pre>
                 </ul>
             </div>
 
-            <div class="bg-slate-900 text-slate-300 p-8 rounded-xl shadow-2xl mt-12 border-t-4 border-yellow-500">
-                <h2 class="text-white mt-0 mb-2">⚔️ Exercício Prático: Sistema de RPG Completo</h2>
-                <p class="mb-6 text-lg text-slate-400">Implemente um Sistema de RPG usando todos os conceitos de OOP.</p>
-                
-                <h3 class="text-yellow-400 font-bold uppercase text-sm tracking-wider mb-3">Requisitos:</h3>
-                <ul class="list-disc pl-5 space-y-2 mb-6 text-sm">
-                    <li><strong>Classe Base Personagem:</strong>
-                        <ul class="list-disc pl-5 mt-1 text-slate-500">
-                            <li>Propriedades privadas: vida, mana, energia</li>
-                            <li>Propriedades públicas: nome, nivel, experiencia</li>
-                            <li>Getters para propriedades privadas</li>
-                            <li>Métodos: atacar(), defender(), receberDano(), curar()</li>
-                            <li>Método para subir de nível (aumenta stats)</li>
-                        </ul>
+            <div class="bg-slate-900 text-slate-300 p-8 rounded-xl shadow-2xl mt-12 border-t-4 border-amber-500">
+                <h2 class="text-white mt-0 mb-2">🛍️ Desafio Final: Sistema de E-commerce com OOP</h2>
+                <p class="mb-6 text-lg text-slate-400">Crie um sistema completo de e-commerce aplicando todos os conceitos de classes, herança, encapsulamento e métodos estáticos.</p>
+
+                <h3 class="text-amber-400 font-bold mb-4 uppercase text-sm tracking-wider">Requisitos Obrigatórios:</h3>
+
+                <h4 class="text-white font-bold mb-2">1. Classe Base: Produto</h4>
+                <ul class="list-disc pl-5 text-sm text-slate-300 mb-6 space-y-1">
+                    <li>Propriedades privadas: <code>#preco</code>, <code>#estoque</code></li>
+                    <li>Propriedades públicas: <code>nome</code>, <code>descricao</code>, <code>id</code></li>
+                    <li>Getters para preço e estoque</li>
+                    <li>Setter para preço (com validação: não negativo e máximo de 1.000.000)</li>
+                    <li>Método <code>diminuirEstoque(quantidade)</code> - retorna erro se insuficiente</li>
+                    <li>Método <code>aumentarEstoque(quantidade)</code></li>
+                    <li>Método estático <code>criarComDesconto(nome, preco, desconto)</code> - retorna produto com preço reduzido</li>
+                </ul>
+
+                <h4 class="text-white font-bold mb-2">2. Classes Especializadas (herdam de Produto)</h4>
+                <ul class="list-disc pl-5 text-sm text-slate-300 mb-6 space-y-3">
+                    <li>
+                        <strong>ProdutoFisico:</strong><br>
+                        Propriedade adicional: <code>peso</code> (kg)<br>
+                        Propriedade privada: <code>#custoDeFrete</code><br>
+                        Getter <code>precoComFrete()</code> - calcula preço + frete baseado no peso<br>
+                        Método <code>simularFrete(peso)</code> - estático, retorna custo aproximado
                     </li>
-                    <li><strong>3 Classes Especializadas (herdam de Personagem):</strong>
-                        <ul class="list-disc pl-5 mt-1 text-slate-500">
-                            <li><strong>Guerreiro:</strong> Alta vida, ataque físico forte, habilidade "Berserk"</li>
-                            <li><strong>Mago:</strong> Baixa vida, ataques mágicos, gasta mana, habilidade "Cura em Área"</li>
-                            <li><strong>Ladino:</strong> Vida média, ataques rápidos, chance de crítico, habilidade "Furtividade"</li>
-                        </ul>
+                    <li>
+                        <strong>ProdutoDigital:</strong><br>
+                        Propriedade: <code>tamanhoMB</code><br>
+                        Propriedade privada: <code>#chaveDeAtivacao</code><br>
+                        Getter <code>chaveDeAtivacao()</code> - retorna a chave (só para uso interno)<br>
+                        Método <code>validarChave(chave)</code> - privado, verifica se é válida<br>
+                        Método <code>ativar(chave)</code> - retorna mensagem de sucesso ou erro
                     </li>
-                    <li><strong>Classe Inimigo (herda de Personagem):</strong>
-                        <ul class="list-disc pl-5 mt-1 text-slate-500">
-                            <li>Diferentes tipos: Goblin, Orc, Dragão (com stats diferentes)</li>
-                            <li>Ao morrer, dá experiência ao jogador</li>
-                        </ul>
-                    </li>
-                    <li><strong>Sistema de Combate:</strong>
-                        <ul class="list-disc pl-5 mt-1 text-slate-500">
-                            <li>Turnos alternados</li>
-                            <li>Inimigo ataca automaticamente</li>
-                            <li>Combate termina quando um morre</li>
-                        </ul>
+                    <li>
+                        <strong>ProdutoAssinatura:</strong><br>
+                        Propriedade: <code>duracao</code> (em meses)<br>
+                        Propriedade privada: <code>#dataVencimento</code><br>
+                        Getter <code>estaAtivo()</code> - verifica se a assinatura ainda é válida<br>
+                        Getter <code>diasRestantes()</code> - retorna dias até vencer<br>
+                        Método <code>renovar(meses)</code> - estende a data de vencimento
                     </li>
                 </ul>
 
-                <h3 class="text-yellow-400 font-bold uppercase text-sm tracking-wider mb-3">Exemplo de Estrutura Inicial:</h3>
-                <pre class="bg-slate-950 border border-slate-800 rounded p-4 mb-6"><code class="language-javascript">class Personagem {
-  #vida;
-  #vidaMaxima;
-  #mana;
-  #manaMaxima;
-  
-  constructor(nome, vidaMax, manaMax) {
-    this.nome = nome;
-    this.#vidaMaxima = vidaMax;
-    this.#vida = vidaMax;
-    // ... complete a implementação
-  }
-  // ... métodos
-}</code></pre>
-<div class="bg-slate-900 text-slate-300 p-8 rounded-xl shadow-2xl mt-8 border-t-4 border-yellow-500">
-    <h3 class="text-white mt-0 mb-4 text-xl font-bold">🏆 Desafio Extra: RPG Avançado</h3>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div>
-            <h4 class="text-yellow-400 font-bold mb-3 uppercase text-sm tracking-wide">Novas Mecânicas:</h4>
-            <ul class="list-disc pl-5 space-y-2 text-sm text-slate-300">
-                <li>
-                    <strong>Sistema de Inventário:</strong> Adicione arrays para armazenar itens. Permita usar poções (curar) e equipar armas (aumentar ataque).
-                </li>
-                <li>
-                    <strong>Tipos de Dano:</strong> Implemente lógica de pedra-papel-tesoura para danos (Físico, Mágico, Veneno). Ex: Mágico ignora armadura física.
-                </li>
-                <li>
-                    <strong>Defesa e Armadura:</strong> Crie um atributo que reduz o dano recebido (ex: <code>danoFinal = dano - armadura</code>).
-                </li>
-                <li>
-                    <strong>Efeitos de Status:</strong> Adicione flags ou arrays de estados:
-                    <ul class="list-disc pl-4 mt-1 text-xs text-slate-500">
-                        <li><em>Envenenado:</em> Perde vida no início do turno.</li>
-                        <li><em>Atordoado:</em> Perde a vez de atacar.</li>
-                        <li><em>Queimando:</em> Reduz defesa temporariamente.</li>
+                <h4 class="text-white font-bold mb-2">3. Classe: Carrinho de Compras</h4>
+                <ul class="list-disc pl-5 text-sm text-slate-300 mb-6 space-y-1">
+                    <li>Propriedade privada: <code>#itens</code> (array com {produto, quantidade})</li>
+                    <li>Propriedade privada: <code>#clienteId</code></li>
+                    <li>Método <code>adicionarProduto(produto, quantidade)</code> - validar estoque</li>
+                    <li>Método <code>removerProduto(id)</code> - remove item específico</li>
+                    <li>Método <code>obterTotal()</code> - calcula preço final de TODOS os itens</li>
+                    <li>Método <code>obterItens()</code> - retorna uma cópia dos itens (não o array original)</li>
+                    <li>Método <code>esvaziar()</code> - limpa o carrinho</li>
+                    <li>Método <code>aplicarCupon(codigoDesconto)</code> - aplica desconto de 10%</li>
+                    <li>Getter <code>quantidadeItens()</code> - retorna quantidade de itens únicos no carrinho</li>
+                </ul>
+
+                <h4 class="text-white font-bold mb-2">4. Classe: Cliente</h4>
+                <ul class="list-disc pl-5 text-sm text-slate-300 mb-6 space-y-1">
+                    <li>Propriedades privadas: <code>#email</code>, <code>#cpf</code>, <code>#carrinhos</code> (histórico)</li>
+                    <li>Propriedades públicas: <code>nome</code>, <code>telefone</code></li>
+                    <li>Getter <code>email()</code> - retorna email (acesso restrito)</li>
+                    <li>Setter <code>email()</code> - valida se contém @</li>
+                    <li>Método estático <code>validarCPF(cpf)</code> - retorna true/false</li>
+                    <li>Método <code>criarCarrinho()</code> - cria novo carrinho e retorna referência</li>
+                    <li>Método <code>finalizarCompra(carrinhoId)</code> - move carrinho para histórico e limpa</li>
+                    <li>Método <code>obterHistoricoCompras()</code> - retorna lista de carrinhos finalizados</li>
+                    <li>Getter <code>totalGastoHistorico()</code> - soma todos os pedidos já realizados</li>
+                    <li>Propriedade estática: <code>#totalClientesCadastrados</code> e método estático para retornar</li>
+                </ul>
+
+                <h4 class="text-white font-bold mb-2">5. Classe: Loja (controladora)</h4>
+                <ul class="list-disc pl-5 text-sm text-slate-300 mb-6 space-y-1">
+                    <li>Propriedades estáticas: <code>#catalogo</code> (array de produtos), <code>#clientes</code> (array de clientes)</li>
+                    <li>Método estático <code>adicionarProduto(produto)</code></li>
+                    <li>Método estático <code>buscarProdutoPorId(id)</code> - retorna o produto</li>
+                    <li>Método estático <code>listarProdutos(tipo)</code> - filtra por tipo (Fisico, Digital, Assinatura)</li>
+                    <li>Método estático <code>registrarCliente(cliente)</code> - valida CPF e email</li>
+                    <li>Método estático <code>obterCliente(id)</code></li>
+                    <li>Método estático <code>gerarRelatorio()</code> - retorna: Total de produtos, Valor total, Clientes cadastrados, Produto mais caro/barato</li>
+                </ul>
+
+                <h4 class="text-amber-400 font-bold mb-2 text-sm uppercase tracking-wide">🎮 Exemplo de Uso Esperado:</h4>
+                <pre class="bg-slate-950 border border-slate-800 rounded p-4 mb-6 text-xs overflow-x-auto"><code class="language-javascript">// Criar produtos
+const mouseGamer = new ProdutoFisico("Mouse Gamer", 250, 50, 0.15);
+const java101 = new ProdutoDigital("Curso Java 101", 79.90, 500);
+const netflixPlus = new ProdutoAssinatura("Netflix Premium", 49.90, 12);
+
+// Adicionar à loja
+Loja.adicionarProduto(mouseGamer);
+Loja.adicionarProduto(java101);
+Loja.adicionarProduto(netflixPlus);
+
+// Criar cliente
+const cliente = new Cliente("João Silva", "joao@email.com", "123.456.789-00", "11999999999");
+Loja.registrarCliente(cliente);
+
+// Criar carrinho e comprar
+const carrinho = cliente.criarCarrinho();
+carrinho.adicionarProduto(mouseGamer, 2);
+carrinho.adicionarProduto(java101, 1);
+carrinho.aplicarCupon("DESCONTO10");
+
+console.log(carrinho.obterTotal()); // Com frete e desconto
+cliente.finalizarCompra(carrinho.id);
+
+// Gerar relatório
+console.log(Loja.gerarRelatorio());</code></pre>
+
+                <div class="p-5 bg-slate-800 rounded border border-slate-700">
+                    <h4 class="text-yellow-400 font-bold mb-3 text-sm uppercase tracking-wide">🏆 Desafio Extra: Sistema de Avaliações</h4>
+                    <ul class="list-disc pl-4 text-sm space-y-2 text-slate-300">
+                        <li>Adicione classe <code>Avaliacao</code> com: <code>#nota</code> (1-5), <code>#comentario</code>, <code>#clienteId</code></li>
+                        <li>Produtos podem receber avaliações através de método <code>adicionarAvaliacao(avaliacao)</code></li>
+                        <li>Getter <code>mediaAvaliacoes()</code> - calcula nota média</li>
+                        <li>Getter <code>avaliacoes()</code> - retorna array de avaliações do produto</li>
+                        <li>Método <code>filtrarAvaliacoes(nota)</code> - retorna avaliações com aquela nota</li>
                     </ul>
-                </li>
-            </ul>
-        </div>
-
-        <div>
-            <h4 class="text-yellow-400 font-bold mb-3 uppercase text-sm tracking-wide">Automação de Batalha:</h4>
-            <p class="text-sm mb-3">Implemente um método estático na classe principal ou uma classe <code>Arena</code> para simular o combate:</p>
-            <pre class="bg-slate-950 border border-slate-800 rounded p-4 text-xs overflow-x-auto"><code class="language-javascript">static simularBatalha(lutador1, lutador2) {
-  console.log("Iniciando simulação...");
-  while(lutador1.estaVivo && lutador2.estaVivo) {
-      lutador1.atacar(lutador2);
-      if(lutador2.estaVivo) lutador2.atacar(lutador1);
-      // Processar efeitos de status...
-  }
-  return lutador1.estaVivo ? lutador1 : lutador2;
-}</code></pre>
-        </div>
-    </div>
-
-    <div class="mt-8 pt-6 border-t border-slate-700">
-        <h4 class="font-bold text-white mb-3">💡 Dicas de Arquitetura:</h4>
-        <ul class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-slate-400">
-            <li class="flex items-start gap-2">
-                <span class="text-yellow-500">➜</span> 
-                Use herança apenas quando fizer sentido (relação "é um"). Evite heranças profundas.
-            </li>
-            <li class="flex items-start gap-2">
-                <span class="text-yellow-500">➜</span> 
-                Encapsule dados sensíveis (vida, mana) com campos privados (<code>#</code>) para evitar cheats.
-            </li>
-            <li class="flex items-start gap-2">
-                <span class="text-yellow-500">➜</span> 
-                Valide todas as entradas: não permita vida negativa ou ataque com valor nulo.
-            </li>
-            <li class="flex items-start gap-2">
-                <span class="text-yellow-500">➜</span> 
-                Use getters para propriedades computadas (ex: <code>poderTotal</code> baseado em força + arma).
-            </li>
-            <li class="flex items-start gap-2">
-                <span class="text-yellow-500">➜</span> 
-                Princípio da Responsabilidade Única: A
-
-                <div class="text-xs text-slate-500 italic mt-4">
-                    <strong class="text-slate-400">Dica:</strong> Use campos privados (<code>#</code>) para proteger a vida e mana, impedindo modificações diretas inválidas (ex: vida negativa).
                 </div>
             </div>
 
@@ -4888,7 +5001,7 @@ console.log(mago.meditar());</code></pre>
                 <p class="mt-2 font-bold text-amber-500">Bons estudos! ⚔️</p>
             </div>
         `
-    },  
+    },
     "5.1": {
         module: "Módulo 05: DOM e Eventos",
         title: "Manipulação do DOM",
