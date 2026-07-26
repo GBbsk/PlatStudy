@@ -145,28 +145,51 @@
         });
 
         // --- 3. LÓGICA DE CARREGAMENTO ---
+        function parseId(id) {
+            let track = '';
+            let rest = id;
+            if (id.startsWith('h')) {
+                track = 'htmlcss';
+                rest = id.slice(1);
+            } else if (id.startsWith('n')) {
+                track = 'node';
+                rest = id.slice(1);
+            } else {
+                track = 'frontend';
+            }
+
+            if (rest === 'final') return { track, major: 99, minor: 99, type: 'final' };
+            if (rest.startsWith('x')) {
+                const num = parseInt(rest.slice(1), 10);
+                return { track, major: num, minor: 99, type: 'exercise' };
+            }
+            const [maj, min] = rest.split('.').map(n => parseInt(n, 10));
+            return { track, major: maj || 0, minor: min || 0, type: 'lesson' };
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
-            const lessonId = urlParams.get('id') || "1.1"; // Fallback para 1.1 para teste
+            const lessonId = urlParams.get('id') || "h0.1"; // Fallback para h0.1 se vazio
             
             try {
                 const response = await fetch('aulas.json');
                 if (!response.ok) throw new Error('Falha ao carregar aulas.json');
                 lessons = await response.json();
                 
-                // Ordenar IDs numericamente (1.1, 1.2, 2.1, etc)
+                const trackOrder = { 'htmlcss': 1, 'frontend': 2, 'node': 3 };
+
                 lessonIds = Object.keys(lessons).sort((a, b) => {
-                    const partsA = a.split('.').map(Number);
-                    const partsB = b.split('.').map(Number);
-                    for (let i = 0; i < Math.max(partsA.length, partsB.length); i++) {
-                        if ((partsA[i] || 0) !== (partsB[i] || 0)) {
-                            return (partsA[i] || 0) - (partsB[i] || 0);
-                        }
+                    const pa = parseId(a);
+                    const pb = parseId(b);
+                    if (pa.track !== pb.track) {
+                        return (trackOrder[pa.track] || 0) - (trackOrder[pb.track] || 0);
                     }
-                    return 0;
+                    if (pa.major !== pb.major) return pa.major - pb.major;
+                    if (pa.minor !== pb.minor) return pa.minor - pb.minor;
+                    return pa.type.localeCompare(pb.type);
                 });
 
-                const data = lessons[lessonId] || lessons["1.1"];
+                const data = lessons[lessonId] || lessons["h0.1"] || lessons["1.1"];
                 renderLesson(lessonId, data);
                 updateNavigation(lessonId);
             } catch (error) {
@@ -184,15 +207,16 @@
             const index = lessonIds.indexOf(currentId);
             const prevBtn = document.getElementById('prevBtn');
             const nextBtn = document.getElementById('nextBtn');
+            const currentTrack = parseId(currentId).track;
 
-            if (index > 0) {
+            if (index > 0 && parseId(lessonIds[index - 1]).track === currentTrack) {
                 prevBtn.disabled = false;
                 prevBtn.onclick = () => window.location.href = `aula.html?id=${lessonIds[index - 1]}`;
             } else {
                 prevBtn.disabled = true;
             }
 
-            if (index < lessonIds.length - 1 && index !== -1) {
+            if (index !== -1 && index < lessonIds.length - 1 && parseId(lessonIds[index + 1]).track === currentTrack) {
                 nextBtn.disabled = false;
                 nextBtn.onclick = () => window.location.href = `aula.html?id=${lessonIds[index + 1]}`;
             } else {
@@ -211,7 +235,8 @@
                 'purple':  'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300',
                 'orange':  'bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300',
                 'yellow':  'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
-                'slate':   'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                'slate':   'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+                'teal':    'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300'
             };
             
             const themeClass = colorMap[colorName] || colorMap['slate'];
